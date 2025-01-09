@@ -55,7 +55,7 @@
                 const dateCells = row.querySelectorAll("td[data-date]");
 
                 numberCells.forEach((cell) => {
-                    const rawNumber = parseFloat(cell.getAttribute("data-number"));
+                    const rawNumber = Math.round(parseFloat(cell.getAttribute("data-number")));
                     // const formattedNumber = numberWithCommas(rawNumber);
                     const formattedNumber = rawNumber.toLocaleString("en-IN", {
                     maximumFractionDigits: 2,
