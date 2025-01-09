@@ -1,0 +1,35 @@
+<table>
+  <caption>
+    CE Strikes on {{ dataset.Date }} for <b>{{ dataset.Strike }}</b>
+  </caption>
+  <thead>
+    <th>Strike</th>
+    <th>EOD OI Change</th>
+  </thead>
+  <tbody>
+    {% for row in dataset.CE %}
+    <tr>
+      <td class="{{ 'highlight' if row.StrkPric < dataset.Strike else '' }}">{{ row.StrkPric }}</td>
+      <td data-number="{{ row.EODOIChng }}"></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<table>
+  <caption>
+    PE Strikes on {{ dataset.Date }} for <b>{{ dataset.Strike }}</b>
+  </caption>
+  <thead>
+    <th>Strike</th>
+    <th>EOD OI Change</th>
+  </thead>
+  <tbody>
+    {% for row in dataset.PE %}
+    <tr>
+      <td class="{{ 'highlight' if row.StrkPric > dataset.Strike else '' }}">{{ row.StrkPric }}</td>
+      <td data-number="{{ row.EODOIChng }}"></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

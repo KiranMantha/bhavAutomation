@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{% endblock %}</title>
+    <style>
+      * {
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+          "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+          "Noto Color Emoji";
+      }
+      body {
+        padding: 0 20px;
+      }
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 0 20px;
+        display: flex;
+        gap: 20px;
+        background: #fff;
+      }
+      h2 {
+        text-align: center;
+      }
+      .card {
+        max-width: 500px;
+        margin: auto;
+      }
+      form > div {
+        margin-bottom: 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid #bbb;
+      }
+      th,
+      td {
+        padding: 8px;
+        text-align: right;
+      }
+      th {
+        text-align: center;
+        background-color: #f2f2f2;
+      }
+      td[colspan] {
+        text-align: left;
+      }
+      .strikes {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap: 20px;
+        max-width: 80%;
+        margin: auto;
+        margin-top: 30px;
+      }
+      .highlight {
+        background-color: #ffff00;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/history">History</a>
+    </nav>
+    {% block content %}{% endblock %}
+    <script>
+      // Function to copy the HTML table as CSV to the clipboard
+      function copyTableAsCSV(tableid) {
+        let table = document.querySelector(`#${tableid}`).outerHTML;
+        table = table
+          .replaceAll("\n", '<br style="mso-data-placement:same-cell;"/>') // new lines inside html cells => Alt+Enter in Excel
+          .replaceAll("<td", '<td style="vertical-align: top;"'); // align top
+        navigator.clipboard.writeText(table).then(
+          () => console.log("success"),
+          (e) => console.log("error", e)
+        );
+      }
+    </script>
+  </body>
+</html>

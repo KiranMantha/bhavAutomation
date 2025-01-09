@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}CSV Upload and Results{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>Upload CSV and Process Data</h2>
+  <form id="csvForm" method="post" enctype="multipart/form-data">
+    <div>
+      <label for="TckrSymb">Ticker Symbol:</label>
+      <input
+        type="text"
+        id="TckrSymb"
+        name="TckrSymb"
+        placeholder="e.g., NIFTY"
+      />
+    </div>
+    <div>
+      <label for="strike_price">Current Strike Price:</label>
+      <input
+        type="number"
+        id="strike_price"
+        name="strike_price"
+        step="0.01"
+        placeholder="e.g., 24000"
+      />
+    </div>
+    <div>
+      <label for="XpryDt1">Weekly Expiry Date:</label>
+      <input type="date" id="XpryDt1" name="XpryDt1" />
+    </div>
+    <div>
+      <label for="XpryDt2">Monthly Expiry Date:</label>
+      <input type="date" id="XpryDt2" name="XpryDt2" />
+    </div>
+    <div>
+      <input type="file" id="csv" name="file" />
+    </div>
+  </form>
+  <button type="submit" form="csvForm">Upload and Process</button>
+  <button onclick="window.location.pathname = '/'">Reset</button>
+</div>
+
+{% if table %}
+  {% set dataset = table %}
+  {% include 'eod-summary.html' %}
+{% endif %} 
+
+{% if toprecords %}
+<div class="strikes">
+  {% set dataset = toprecords.XpryDt1 %}
+  {% include 'strikes-table.html' %}
+
+  {% set dataset = toprecords.XpryDt2 %}
+  {% include 'strikes-table.html' %}
+</div>
+{% endif %}
+
+<script>
+  function displayTableContent() {
+    {% if table %}
+      // Get all table rows
+      const rows = document.querySelectorAll("table tbody tr");
+
+      // Loop through each row and update cells
+      rows.forEach((row) => {
+        const cells = row.querySelectorAll("td[data-number]");
+
+        cells.forEach((cell) => {
+          const rawNumber = parseFloat(cell.getAttribute("data-number"));
+          // const formattedNumber = numberWithCommas(rawNumber);
+          const formattedNumber = rawNumber.toLocaleString("en-IN", {
+            maximumFractionDigits: 2,
+          });
+          cell.textContent = formattedNumber; // Update the text with the formatted number
+        });
+      });
+
+      const resultRows = JSON.parse('{{ table | tojson | safe }}');
+      window.resultRows = resultRows;
+      {% endif %}
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    displayTableContent();
+  });
+</script>
+{% endblock %}

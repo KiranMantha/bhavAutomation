@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}View History{% endblock %}
+
+{% block content %}
+<h2>History <button onclick="copyTableAsCSV('history')">copy as csv</button></h2>
+<table id="history">
+    <thead>
+        <tr>
+            <th>Expiry</th>
+            <th>Expiry Date</th>
+            <th>Strike</th>
+            <th>EOD CE OI Sum</th>
+            <th>EOD CE OI Change Sum</th>
+            <th>ITM EOD CE OI Sum</th>
+            <th>ITM EOD CE OI Change Sum</th>
+            <th>EOD PE OI Sum</th>
+            <th>EOD PE OI Change Sum</th>
+            <th>ITM EOD PE OI Sum</th>
+            <th>ITM EOD PE OI Change Sum</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for date, rows in table.items() %}
+            <tr class="date-row">
+                <td colspan="11" data-date="{{ date }}"></td>
+            </tr>
+            {% for row in rows %}
+                <tr>
+                    <td>{{ row['Expiry'] }}</td>
+                    <td>{{ row['Expiry_Date'] }}</td>
+                    <td>{{ row['Strike'] }}</td>
+                    <td data-number="{{ row['EOD_CE_OI_Sum'] }}"></td>
+                    <td data-number="{{ row['EOD_CE_OI_Change_Sum'] }}"></td>
+                    <td data-number="{{ row['ITM_EOD_CE_OI_Sum'] }}"></td>
+                    <td data-number="{{ row['ITM_EOD_CE_OI_Change_Sum'] }}"></td>
+                    <td data-number="{{ row['EOD_PE_OI_Sum'] }}"></td>
+                    <td data-number="{{ row['EOD_PE_OI_Change_Sum'] }}"></td>
+                    <td data-number="{{ row['ITM_EOD_PE_OI_Sum'] }}"></td>
+                    <td data-number="{{ row['ITM_EOD_PE_OI_Change_Sum'] }}"></td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+</table>
+<script>
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        {% if table %}
+            // Get all table rows
+            const rows = document.querySelectorAll("table tbody tr");
+
+            // Loop through each row and update cells
+            rows.forEach((row) => {
+                const numberCells = row.querySelectorAll("td[data-number]");
+                const dateCells = row.querySelectorAll("td[data-date]");
+
+                numberCells.forEach((cell) => {
+                    const rawNumber = parseFloat(cell.getAttribute("data-number"));
+                    // const formattedNumber = numberWithCommas(rawNumber);
+                    const formattedNumber = rawNumber.toLocaleString("en-IN", {
+                    maximumFractionDigits: 2,
+                    });
+                    cell.textContent = formattedNumber; // Update the text with the formatted number
+                });
+
+                dateCells.forEach((cell) => {
+                    const date = new Date(cell.getAttribute("data-date"));
+                    cell.textContent = `Date: ${date.toLocaleString('en-gb', { year: 'numeric', month: 'numeric', day: 'numeric' })}`;
+                });
+            });
+            const resultRows = JSON.parse('{{ table | tojson | safe }}');
+            console.log('resultRows', resultRows);
+        {% endif %}
+    });
+</script>
+{% endblock %}

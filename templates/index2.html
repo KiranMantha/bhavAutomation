@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSV Upload and Results</title>
+    <style>
+      * {
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
+          "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+          "Noto Color Emoji";
+      }
+      .card {
+        max-width: 500px;
+        margin: auto;
+      }
+      form > div {
+        margin-bottom: 10px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid black;
+      }
+      th,
+      td {
+        padding: 8px;
+        text-align: right;
+      }
+      th {
+        text-align: center;
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Upload CSV and Process Data</h1>
+      <form id="csvForm" method="post">
+        <div>
+          <label for="TckrSymb">Ticker Symbol:</label>
+          <input
+            type="text"
+            id="TckrSymb"
+            name="TckrSymb"
+            placeholder="e.g., NIFTY"
+          />
+        </div>
+        <div>
+          <label for="strike_price">Strike Price:</label>
+          <input
+            type="number"
+            id="strike_price"
+            name="strike_price"
+            step="0.01"
+            placeholder="e.g., 24000"
+          />
+        </div>
+        <div>
+          <label for="XpryDt1">Weekly Expiry Date:</label>
+          <input type="date" id="XpryDt1" name="XpryDt1" />
+        </div>
+        <div>
+          <label for="XpryDt2">Monthly Expiry Date:</label>
+          <input type="date" id="XpryDt2" name="XpryDt2" />
+        </div>
+        <div>
+          <input type="file" id="csv" name="file" />
+        </div>
+        <button type="submit">Upload and Process</button>
+      </form>
+    </div>
+
+    {% if table %}
+    <h2>
+      Final Results <button onclick="copyTableAsCSV()">copy as csv</button>
+    </h2>
+    <table id="finalTable">
+      <thead>
+        <tr>
+          <th>Expiry</th>
+          <th>Expiry Date</th>
+          <th>Strike</th>
+          <th>EOD CE OI Sum</th>
+          <th>EOD CE OI Change Sum</th>
+          <th>ITM EOD CE OI Sum</th>
+          <th>ITM EOD CE OI Change Sum</th>
+          <th>EOD PE OI Sum</th>
+          <th>EOD PE OI Change Sum</th>
+          <th>ITM EOD PE OI Sum</th>
+          <th>ITM EOD PE OI Change Sum</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in table %}
+        <tr>
+          <td>{{ row['Expiry'] }}</td>
+          <td>{{ row['Expiry_Date'] }}</td>
+          <td>{{ row['Strike'] }}</td>
+          <td data-number="{{ row['EOD_CE_OI_Sum'] }}"></td>
+          <td data-number="{{ row['EOD_CE_OI_Change_Sum'] }}"></td>
+          <td data-number="{{ row['ITM_EOD_CE_OI_Sum'] }}"></td>
+          <td data-number="{{ row['ITM_EOD_CE_OI_Change_Sum'] }}"></td>
+          <td data-number="{{ row['EOD_PE_OI_Sum'] }}"></td>
+          <td data-number="{{ row['EOD_PE_OI_Change_Sum'] }}"></td>
+          <td data-number="{{ row['ITM_EOD_PE_OI_Sum'] }}"></td>
+          <td data-number="{{ row['ITM_EOD_PE_OI_Change_Sum'] }}"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    <script>
+      // Reset form after data is processed and displayed
+      // document.addEventListener('DOMContentLoaded', function() {
+      //     {% if table %}
+      //         // Reset form fields after submission
+      //         document.getElementById('csvForm').reset();
+      //     {% endif %}
+      // });
+
+      function displayTableContent() {
+        if (document.getElementById("finalTable")) {
+          // Get all table rows
+          const rows = document.querySelectorAll("#finalTable tbody tr");
+
+          // Loop through each row and update cells
+          rows.forEach((row) => {
+            const cells = row.querySelectorAll("td[data-number]");
+
+            cells.forEach((cell) => {
+              const rawNumber = parseFloat(cell.getAttribute("data-number"));
+              // const formattedNumber = numberWithCommas(rawNumber);
+              const formattedNumber = rawNumber.toLocaleString("en-IN", {
+                maximumFractionDigits: 2,
+              });
+              cell.textContent = formattedNumber; // Update the text with the formatted number
+            });
+          });
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        displayTableContent();
+        const form = document.getElementById("csvForm");
+
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault(); // Prevent default form submission
+
+          const fileInput = document.getElementById("csv");
+          const file = fileInput.files[0];
+
+          if (!file) {
+            alert("Please upload a CSV file.");
+            return;
+          }
+
+          const startExpiry = new Date(
+            document.getElementById("XpryDt1").value
+          );
+          const endExpiry = new Date(
+            document.getElementById("XpryDt2").value
+          );
+
+          const reader = new FileReader();
+          reader.onload = function () {
+            const csvData = reader.result;
+
+            // Parse CSV into rows
+            const rows = csvData.split("\n").map((row) => row.split(","));
+            const header = rows[0];
+            const body = rows.slice(1);
+
+            // Columns to delete
+            const columnsToDelete = [
+              "TtlTradgVol",
+              "TtlTrfVal",
+              "TtlNbOfTxsExctd",
+              "SsnId",
+              "NewBrdLotQty",
+              "Rmks",
+              "Rsvd1",
+              "Rsvd2",
+              "Rsvd3",
+              "Rsvd4",
+            ];
+
+            // Find indices of columns to delete
+            const indicesToDelete = header
+              .map((col, index) =>
+                columnsToDelete.includes(col.trim()) ? index : -1
+              )
+              .filter((index) => index >= 0);
+
+            // Filter header and rows
+            const filteredHeader = header.filter(
+              (_, index) => !indicesToDelete.includes(index)
+            );
+            const filteredBody = body.map((row) =>
+              row.filter((_, index) => !indicesToDelete.includes(index))
+            );
+
+            // Apply XpryDt filter
+            const expiryIndex = filteredHeader.findIndex(
+              (col) => col.trim() === "XpryDt"
+            );
+            const filteredRows = filteredBody.filter((row) => {
+              const expiryDate = new Date(row[expiryIndex]);
+              return expiryDate >= startExpiry && expiryDate <= endExpiry;
+            });
+
+            // Combine filtered header and rows
+            const finalData = [filteredHeader, ...filteredRows];
+
+            // Convert back to CSV
+            const finalCSV = finalData.map((row) => row.join(",")).join("\n");
+
+            // Upload the filtered CSV to the server
+            const formData = new FormData(event.target);
+            formData.delete('csv');
+            formData.append(
+              "file",
+              new Blob([finalCSV], { type: "text/csv" }),
+              file.name
+            );
+
+            fetch("/", {
+              method: "POST",
+              body: formData,
+            })
+              .then((response) => {
+                if (response.ok) {
+                  return response.text();
+                }
+                throw new Error("Failed to upload file.");
+              })
+              .then((data) => {
+                document.open();
+                document.write(data);
+                document.close();
+              })
+              .catch((error) => {
+                alert(error.message);
+              });
+          };
+
+          reader.readAsText(file);
+        });
+      });
+      // Function to copy the HTML table as CSV to the clipboard
+      function copyTableAsCSV() {
+        let table = document.querySelector("#finalTable").outerHTML;
+        table = table
+          .replaceAll("\n", '<br style="mso-data-placement:same-cell;"/>') // new lines inside html cells => Alt+Enter in Excel
+          .replaceAll("<td", '<td style="vertical-align: top;"'); // align top
+        navigator.clipboard.writeText(table).then(
+          () => console.log("success"),
+          (e) => console.log("error", e)
+        );
+      }
+    </script>
+  </body>
+</html>

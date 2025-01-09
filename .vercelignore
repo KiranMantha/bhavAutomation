@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.env
+tests/
+docs/
+automation_env
+*.py[cod]
+*$py.class
+.codegpt
+data.db
+README.md

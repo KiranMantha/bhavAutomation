@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Upload csv</h1>
+    <h1>Upload csv</h1>
+    <form
+      id="upload-form"
+      method="post"
+      enctype="multipart/form-data"
+      onsubmit="handleFormSubmit(event)"
+    >
+      <div>
+        <label for="expiry-date1">Expiry Date 1:</label>
+        <input type="date" id="expiry-date1" name="expiry-date1" required pattern="\d{2}/\d{2}/\d{2}"/>
+      </div>
+      <div>
+        <label for="expiry-date2">Expiry Date 2:</label>
+        <input type="date" id="expiry-date2" name="expiry-date2" required />
+      </div>
+      <div>
+        <label for="strike-price">Strike Price:</label>
+        <input
+          type="number"
+          id="strike-price"
+          name="strike-price"
+          step="0.01"
+          required
+        />
+      </div>
+      <div>
+        <input type="file" id="csv" name="file" required />
+      </div>
+      <button type="submit">Upload</button>
+    </form>
+
+    <table id="final-table">
+      <thead>
+        <tr>
+          <th>Expiry Date</th>
+          <th>Strike</th>
+          <th>EOD CE OI Sum</th>
+          <th>EOD CE OI Change Sum</th>
+          <th>EOD PE OI Sum</th>
+          <th>EOD PE OI Change Sum</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      let filteredData = [];
+
+      function formatDate(val) {
+        let date = new Date(val);
+        return new Intl.DateTimeFormat("en-GB").format(date, {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric'
+        })
+      }
+
+      // Handle form submission
+      function handleFormSubmit(event) {
+        event.preventDefault(); // Prevent default form submission behavior
+
+        const expiryDate1 = formatDate(document.getElementById("expiry-date1").value);
+        const expiryDate2 = formatDate(document.getElementById("expiry-date2").value);
+        const strikePrice = parseFloat(
+          document.getElementById("strike-price").value
+        );
+        const fileInput = document.getElementById("csv");
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const csv = e.target.result;
+          processCSV(csv, expiryDate1, expiryDate2, strikePrice);
+        };
+        reader.readAsText(file);
+      }
+
+      // Process the CSV content
+      function processCSV(csvData, expiryDate1, expiryDate2, strikePrice) {
+        const rows = csvData.split("\n").map((row) => row.split(","));
+        const headers = rows[0]; // Get headers
+        const data = rows.slice(1); // Get rows of data
+
+        // Columns to delete
+        const columnsToDelete = [
+          "TtlTradgVol",
+          "TtlTrfVal",
+          "TtlNbOfTxsExctd",
+          "SsnId",
+          "NewBrdLotQty",
+          "Rmks",
+          "Rsvd1",
+          "Rsvd2",
+          "Rsvd3",
+          "Rsvd4",
+        ];
+
+        const filtered = data.filter((row) => {
+          const expiryDate = row[headers.indexOf("XpryDt")];
+          const strike = parseFloat(row[headers.indexOf("StrkPric")]);
+
+          // Filter based on expiry date and strike price
+          return (
+            isExpiryDateInRange(expiryDate, expiryDate1, expiryDate2) &&
+            isStrikePriceValid(strike, strikePrice)
+          );
+        });
+
+        // Remove unnecessary columns
+        const filteredWithColumns = filtered.map((row) => {
+          return row.filter((value, index) => {
+            const columnName = headers[index];
+            return !columnsToDelete.includes(columnName);
+          });
+        });
+
+        // Create DataFrame-like structure for further manipulation
+        const finalData = filteredWithColumns.map((row) => {
+          const expiryDate = row[headers.indexOf("XpryDt")];
+          const strike = parseFloat(row[headers.indexOf("StrkPric")]);
+          const opnIntrst = parseFloat(row[headers.indexOf("OpnIntrst")]);
+          const chngInOpnIntrst = parseFloat(
+            row[headers.indexOf("ChngInOpnIntrst")]
+          );
+          const clsPric = parseFloat(row[headers.indexOf("ClsPric")]);
+
+          const eodoI = opnIntrst * clsPric;
+          const eodoIChng = chngInOpnIntrst * clsPric;
+
+          return {
+            expiryDate: expiryDate,
+            strike: strike,
+            eodoI: eodoI,
+            eodoIChng: eodoIChng,
+            optnTp: row[headers.indexOf("OptnTp")],
+          };
+        });
+
+        filteredData = finalData;
+        generateFinalTable(finalData);
+      }
+
+      // Check if the expiry date is in range
+      function isExpiryDateInRange(expiryDate, expiryDate1, expiryDate2) {
+        if (!expiryDate) {
+          return false; // Return false if expiryDate is missing or undefined
+        }
+
+        // Ensure expiryDate is in the expected dd/mm/yyyy format before splitting
+        const expiryParts = expiryDate.split("/");
+        if (expiryParts.length !== 3) {
+          return false; // Return false if expiryDate is not in the expected format
+        }
+
+        const expiry = new Date(expiryParts.reverse().join("-"));
+        const date1 = new Date(expiryDate1);
+        const date2 = new Date(expiryDate2);
+
+        return expiry >= date1 && expiry <= date2;
+      }
+
+      // Check if the strike price is valid
+      function isStrikePriceValid(strike, inputStrikePrice) {
+        return inputStrikePrice ? strike === inputStrikePrice : true;
+      }
+
+      // Generate the final table with processed data
+      function generateFinalTable(groupedData) {
+        // Ensure groupedData is an array or convert it to an array if it's an object
+        const dataArray = Array.isArray(groupedData)
+          ? groupedData
+          : Object.values(groupedData);
+
+        // Now you can safely use forEach
+        dataArray.forEach((item) => {
+          // Your table generation logic here
+          console.log(item); // Example usage, replace with actual logic
+        });
+      }
+
+      // Helper function to group by multiple properties (expiryDate, strike)
+      function groupBy(array, keys) {
+        return array.reduce((result, item) => {
+          const key = keys.map((k) => item[k]).join("|");
+          if (!result[key]) {
+            result[key] = [];
+          }
+          result[key].push(item);
+          return result;
+        }, {});
+      }
+
+      // Helper function to format numbers with commas
+      function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+    </script>
+  </body>
+</html>

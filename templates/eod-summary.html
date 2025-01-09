@@ -1,0 +1,66 @@
+<div>
+  <h2>EOD Summary <button onclick="copyTableAsCSV('finalTable')">copy as csv</button> <button onclick="saveEodSummary()">Save</button></h2>
+  <table id="finalTable">
+    <thead>
+      <tr>
+        <th>Expiry</th>
+        <th>Expiry Date</th>
+        <th>Strike</th>
+        <th>EOD CE OI Sum</th>
+        <th>EOD CE OI Change Sum</th>
+        <th>ITM EOD CE OI Sum</th>
+        <th>ITM EOD CE OI Change Sum</th>
+        <th>EOD PE OI Sum</th>
+        <th>EOD PE OI Change Sum</th>
+        <th>ITM EOD PE OI Sum</th>
+        <th>ITM EOD PE OI Change Sum</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in table %}
+      <tr>
+        <td>{{ row['Expiry'] }}</td>
+        <td>{{ row['Expiry_Date'] }}</td>
+        <td>{{ row['Strike'] }}</td>
+        <td data-number="{{ row['EOD_CE_OI_Sum'] }}"></td>
+        <td data-number="{{ row['EOD_CE_OI_Change_Sum'] }}"></td>
+        <td data-number="{{ row['ITM_EOD_CE_OI_Sum'] }}"></td>
+        <td data-number="{{ row['ITM_EOD_CE_OI_Change_Sum'] }}"></td>
+        <td data-number="{{ row['EOD_PE_OI_Sum'] }}"></td>
+        <td data-number="{{ row['EOD_PE_OI_Change_Sum'] }}"></td>
+        <td data-number="{{ row['ITM_EOD_PE_OI_Sum'] }}"></td>
+        <td data-number="{{ row['ITM_EOD_PE_OI_Change_Sum'] }}"></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<script>
+  async function saveEodSummary() {
+    console.log(window.resultRows);
+    try {
+      // Log the result_rows to the browser console
+      console.log('Rows to be saved:', window.resultRows);
+
+      // Send the result_rows to the backend
+      const response = await fetch('/saveeodsummary', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ rows: window.resultRows })
+      });
+
+      const result = await response.json();
+
+      // Log the server response
+      console.log('Server response:', result);
+
+      // Notify the user
+      alert(result.message);
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Failed to save data.');
+    }
+  }
+</script>
