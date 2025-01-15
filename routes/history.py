@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, request, render_template
 from collections import defaultdict
 from datetime import datetime
 from routes.supabase_client import get_supabase_instance
@@ -9,8 +9,10 @@ supabase = get_supabase_instance()
 
 @history.route('/history')
 def index():
+    TckrSymb = request.args.get('TckrSymb', 'NIFTY') 
+
     # Fetch all data from the EOD_SUMMARY table
-    response = supabase.table("EOD_SUMMARY").select("*").execute()
+    response = supabase.table("EOD_SUMMARY").select("*").eq('TckrSymb', TckrSymb).execute()
     data = response.data
     
     # Group the data by `created_at` (considering only the date part)

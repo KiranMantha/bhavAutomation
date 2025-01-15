@@ -3,7 +3,10 @@
 {% block title %}View History{% endblock %}
 
 {% block content %}
-<h2>History <button onclick="copyTableAsCSV('history')">copy as csv</button></h2>
+<h2>History <select name="TckrSymb" id="TckrSymb" onchange="updateQueryParam(this.value)">
+    <option value="NIFTY">NIFTY</option>
+    <option value="BANKNIFTY">BANKNIFTY</option>
+  </select> <button onclick="copyTableAsCSV('history')">copy as csv</button></h2>
 <table id="history">
     <thead>
         <tr>
@@ -43,8 +46,17 @@
         {% endfor %}
 </table>
 <script>
+    function updateQueryParam(value) {
+        const url = new URL(window.location);
+        url.searchParams.set('TckrSymb', value);
+        window.location.href = url.toString();
+    }
     
     document.addEventListener("DOMContentLoaded", () => {
+        const url = new URL(window.location);
+        let element = document.getElementById('TckrSymb');
+        element.value = url.searchParams.get('TckrSymb') || 'NIFTY';
+
         {% if table %}
             // Get all table rows
             const rows = document.querySelectorAll("table tbody tr");
