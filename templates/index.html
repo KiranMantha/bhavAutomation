@@ -8,12 +8,10 @@
   <form id="csvForm" method="post" enctype="multipart/form-data">
     <div>
       <label for="TckrSymb">Ticker Symbol:</label>
-      <input
-        type="text"
-        id="TckrSymb"
-        name="TckrSymb"
-        placeholder="e.g., NIFTY"
-      />
+      <select id="TckrSymb" name="TckrSymb">
+        <option value="NIFTY">NIFTY</option>
+        <option value="BANKNIFTY">BANKNIFTY</option>
+      </select>
     </div>
     <div>
       <label for="strike_price">Current Strike Price:</label>

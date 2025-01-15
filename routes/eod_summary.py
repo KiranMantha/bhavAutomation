@@ -106,6 +106,7 @@ def uploadFiles():
             # Append row to results
             result_rows.append({
                 'Expiry': expiry,
+                'TckrSymb': TckrSymb_input,
                 'Expiry_Date': expiry_date,
                 'Strike': strike_price,
                 'EOD_CE_OI_Sum': ce_eod_sum,
