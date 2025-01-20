@@ -1,5 +1,5 @@
 <div>
-  <h2>EOD Summary <button onclick="copyTableAsCSV('finalTable')">copy as csv</button> <button onclick="saveEodSummary()">Save</button></h2>
+  <h2>EOD Summary For {{ context.ticker_symbol }} <button onclick="copyTableAsCSV('finalTable')">copy as csv</button> <button onclick="saveEodSummary()">Save</button></h2>
   <table id="finalTable">
     <thead>
       <tr>
@@ -17,7 +17,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for row in table %}
+      {% for row in context.dataset %}
       <tr>
         <td>{{ row['Expiry'] }}</td>
         <td>{{ row['Expiry_Date'] }}</td>

@@ -40,14 +40,16 @@
 </div>
 
 {% if table %}
-  {% set dataset = table %}
-  {% include 'eod-summary.html' %}
+  {% set context = {'dataset': table, 'ticker_symbol': TckrSymb} %}
+  {% include 'eod-summary.html' with context %}
 {% endif %} 
 
 {% if toprecords %}
 <div class="strikes">
-  {% set dataset = toprecords.XpryDt1 %}
-  {% include 'strikes-table.html' %}
+  {% if toprecords.XpryDt1 %}
+    {% set dataset = toprecords.XpryDt1 %}
+    {% include 'strikes-table.html' %}
+  {% endif %}
 
   {% set dataset = toprecords.XpryDt2 %}
   {% include 'strikes-table.html' %}
@@ -75,12 +77,30 @@
       });
 
       const resultRows = JSON.parse('{{ table | tojson | safe }}');
+      console.log('{{ TckrSymb }}')
       window.resultRows = resultRows;
       {% endif %}
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     displayTableContent();
+    const tickerSymbol = document.getElementById("TckrSymb");
+    const weeklyExpiry = document.getElementById("XpryDt1");
+
+    const updateFieldState = () => {
+      if (tickerSymbol.value === "BANKNIFTY") {
+        weeklyExpiry.disabled = true;
+      } else {
+        weeklyExpiry.disabled = false;
+      }
+      weeklyExpiry.value = ""; // Clear the value if any
+    };
+
+    // Initialize the state on page load
+    updateFieldState();
+
+    // Update the state whenever the ticker symbol changes
+    tickerSymbol.addEventListener("change", updateFieldState);
   });
 </script>
 {% endblock %}

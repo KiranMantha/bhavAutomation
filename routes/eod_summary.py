@@ -31,12 +31,16 @@ def uploadFiles():
         XpryDt2 = request.form.get('XpryDt2')  # YYYY-MM-DD format
 
         # Convert request expiry dates to datetime objects (same format as in the CSV)
-        XpryDt1 = datetime.strptime(XpryDt1, '%Y-%m-%d').strftime('%d/%m/%y')
+        XpryDt1 = datetime.strptime(XpryDt1, '%Y-%m-%d').strftime('%d/%m/%y') if TckrSymb_input == 'NIFTY' else None
         XpryDt2 = datetime.strptime(XpryDt2, '%Y-%m-%d').strftime('%d/%m/%y')
 
+        # Validate expiry dates for Nifty
+        if TckrSymb_input == 'NIFTY' and not XpryDt1 or not XpryDt2:
+            return "Both weekly and monthly expiry dates are required for Nifty.", 400
+        
         # Validate expiry dates
-        if not XpryDt1 or not XpryDt2:
-            return "Both expiry dates (XpryDt1 and XpryDt2) are required.", 400
+        if TckrSymb_input == 'BANKNIFTY' and not XpryDt2:
+            return "Monthly expiry date is required for BankNifty.", 400
 
         # Load the CSV into a Pandas DataFrame
         df = pd.read_csv(file)
@@ -49,34 +53,41 @@ def uploadFiles():
         filtered_df = df[(df['FinInstrmTp'] == 'IDO') & (df['TckrSymb'] == TckrSymb_input)]
         
         # Filter further by the two expiry dates
-        filtered_df = filtered_df[(filtered_df['XpryDt'] == XpryDt1) | (filtered_df['XpryDt'] == XpryDt2)]
+        if TckrSymb_input == 'NIFTY':
+            filtered_df = filtered_df[(filtered_df['XpryDt'] == XpryDt1) | (filtered_df['XpryDt'] == XpryDt2)]
+        
+        if TckrSymb_input == 'BANKNIFTY':
+            filtered_df = filtered_df[(filtered_df['XpryDt'] == XpryDt2)]
         
         ce_xpry_dt1 = filtered_df[(filtered_df['OptnTp'] == 'CE') & (filtered_df['XpryDt'] == XpryDt1)].sort_values(by='EODOIChng', ascending=False).head(10)
         pe_xpry_dt1 = filtered_df[(filtered_df['OptnTp'] == 'PE') & (filtered_df['XpryDt'] == XpryDt1)].sort_values(by='EODOIChng', ascending=False).head(10)
         ce_xpry_dt2 = filtered_df[(filtered_df['OptnTp'] == 'CE') & (filtered_df['XpryDt'] == XpryDt2)].sort_values(by='EODOIChng', ascending=False).head(10)
         pe_xpry_dt2 = filtered_df[(filtered_df['OptnTp'] == 'PE') & (filtered_df['XpryDt'] == XpryDt2)].sort_values(by='EODOIChng', ascending=False).head(10)
 
-        toprecords = {
-                'XpryDt1': {
-                    'Strike': strike_price,
-                    'Date': XpryDt1,
-                    'CE': ce_xpry_dt1[['StrkPric', 'EODOIChng']].to_dict('records'),
-                    'PE': pe_xpry_dt1[['StrkPric', 'EODOIChng']].to_dict('records')
-                },
-                'XpryDt2': {
-                    'Strike': strike_price,
-                    'Date': XpryDt2,
-                    'CE': ce_xpry_dt2[['StrkPric', 'EODOIChng']].to_dict('records'),
-                    'PE': pe_xpry_dt2[['StrkPric', 'EODOIChng']].to_dict('records')
-                }
+        # Initialize toprecords and expiry groups
+        toprecords = {}
+        expiry_groups = []
+
+        # populate toprecords and expiry groups dynamically based on provided expiry dates
+        expiry_groups = []
+        if TckrSymb_input == 'NIFTY':
+            toprecords['XpryDt1'] = {
+                'Strike': strike_price,
+                'Date': XpryDt1,
+                'CE': ce_xpry_dt1[['StrkPric', 'EODOIChng']].to_dict('records'),
+                'PE': pe_xpry_dt1[['StrkPric', 'EODOIChng']].to_dict('records')
             }
+            expiry_groups.append({'Expiry': 'Weekly', 'XpryDt': XpryDt1})
+            
 
-        # Process expiry groups dynamically based on provided expiry dates
-        expiry_groups = [
-            {'Expiry': 'Weekly', 'XpryDt': XpryDt1},
-            {'Expiry': 'Monthly', 'XpryDt': XpryDt2}
-        ]
-
+        toprecords['XpryDt2'] =  {
+            'Strike': strike_price,
+            'Date': XpryDt2,
+            'CE': ce_xpry_dt2[['StrkPric', 'EODOIChng']].to_dict('records'),
+            'PE': pe_xpry_dt2[['StrkPric', 'EODOIChng']].to_dict('records')
+        }
+        expiry_groups.append({'Expiry': 'Monthly', 'XpryDt': XpryDt2})
+        
         result_rows = []
         for group in expiry_groups:
             expiry = group['Expiry']
@@ -123,7 +134,7 @@ def uploadFiles():
         final_table = pd.DataFrame(result_rows)
 
         # Return the tables as response
-        return render_template('index.html', table=result_rows, toprecords=toprecords)
+        return render_template('index.html', TckrSymb=TckrSymb_input, table=result_rows, toprecords=toprecords)
 
     except Exception as e:
         return f"Error processing the file: {e}", 500
