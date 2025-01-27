@@ -9,7 +9,7 @@
   <tbody>
     {% for row in dataset.CE %}
     <tr>
-      <td class="{{ 'highlight' if row.StrkPric < dataset.Strike else '' }}">{{ row.StrkPric }}</td>
+      <td class="{{ 'highlight' if row.isSelectedRecord else '' }}">{{ row.StrkPric }}</td>
       <td data-number="{{ row.EODOIChng }}"></td>
     </tr>
     {% endfor %}
@@ -27,7 +27,7 @@
   <tbody>
     {% for row in dataset.PE %}
     <tr>
-      <td class="{{ 'highlight' if row.StrkPric > dataset.Strike else '' }}">{{ row.StrkPric }}</td>
+      <td class="{{ 'highlight' if row.isSelectedRecord else '' }}">{{ row.StrkPric }}</td>
       <td data-number="{{ row.EODOIChng }}"></td>
     </tr>
     {% endfor %}

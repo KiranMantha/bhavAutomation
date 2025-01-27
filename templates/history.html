@@ -1,88 +1,216 @@
-{% extends "base.html" %}
-
-{% block title %}View History{% endblock %}
-
-{% block content %}
-<h2>History <select name="TckrSymb" id="TckrSymb" onchange="updateQueryParam(this.value)">
+{% extends "base.html" %} {% block title %}View History{% endblock %} {% block
+content %}
+<h2>
+  History
+  <select name="TckrSymb" id="TckrSymb" onchange="updateQueryParam(this.value)">
     <option value="NIFTY">NIFTY</option>
     <option value="BANKNIFTY">BANKNIFTY</option>
-  </select> <button onclick="copyTableAsCSV('history')">copy as csv</button></h2>
+  </select>
+  <button onclick="copyTableAsCSV('history')">copy as csv</button>
+</h2>
 <table id="history">
-    <thead>
-        <tr>
-            <th>Expiry</th>
-            <th>Expiry Date</th>
-            <th>Strike</th>
-            <th>EOD CE OI Sum</th>
-            <th>EOD CE OI Change Sum</th>
-            <th>ITM EOD CE OI Sum</th>
-            <th>ITM EOD CE OI Change Sum</th>
-            <th>EOD PE OI Sum</th>
-            <th>EOD PE OI Change Sum</th>
-            <th>ITM EOD PE OI Sum</th>
-            <th>ITM EOD PE OI Change Sum</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for date, rows in table.items() %}
-            <tr class="date-row">
-                <td colspan="11" data-date="{{ date }}"></td>
-            </tr>
-            {% for row in rows %}
-                <tr>
-                    <td>{{ row['Expiry'] }}</td>
-                    <td>{{ row['Expiry_Date'] }}</td>
-                    <td>{{ row['Strike'] }}</td>
-                    <td data-number="{{ row['EOD_CE_OI_Sum'] }}"></td>
-                    <td data-number="{{ row['EOD_CE_OI_Change_Sum'] }}"></td>
-                    <td data-number="{{ row['ITM_EOD_CE_OI_Sum'] }}"></td>
-                    <td data-number="{{ row['ITM_EOD_CE_OI_Change_Sum'] }}"></td>
-                    <td data-number="{{ row['EOD_PE_OI_Sum'] }}"></td>
-                    <td data-number="{{ row['EOD_PE_OI_Change_Sum'] }}"></td>
-                    <td data-number="{{ row['ITM_EOD_PE_OI_Sum'] }}"></td>
-                    <td data-number="{{ row['ITM_EOD_PE_OI_Change_Sum'] }}"></td>
-                </tr>
-            {% endfor %}
-        {% endfor %}
+  <thead>
+    <tr>
+      <th>Expiry</th>
+      <th>Expiry Date</th>
+      <th>Strike</th>
+      <th>EOD CE OI Sum</th>
+      <th>EOD CE OI Change Sum</th>
+      <th>ITM EOD CE OI Sum</th>
+      <th>ITM EOD CE OI Change Sum</th>
+      <th>EOD PE OI Sum</th>
+      <th>EOD PE OI Change Sum</th>
+      <th>ITM EOD PE OI Sum</th>
+      <th>ITM EOD PE OI Change Sum</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for date, rows in table.items() %}
+    <tr class="date-row">
+      <td colspan="11">
+        <b><span data-date="{{ date.split('__')[0] }}"></span></b>
+        <button data-strike="{{date.split('__')[1]}}">
+          Get Option Strikes
+        </button>
+      </td>
+    </tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row['Expiry'] }}</td>
+      <td>{{ row['Expiry_Date'] }}</td>
+      <td>{{ row['Strike'] }}</td>
+      <td><div data-number="{{ row['EOD_CE_OI_Sum'] }}"></div></td>
+      <td>
+        <div data-number="{{ row['EOD_CE_OI_Change_Sum'] }}"></div>
+        <span
+          >{{ '{:.2f}'.format((row['EOD_CE_OI_Change_Sum'] /
+          row['EOD_CE_OI_Sum'])*100|float) }}</span
+        >
+      </td>
+      <td>
+        <div data-number="{{ row['ITM_EOD_CE_OI_Sum'] }}"></div>
+        <span
+          >{{ '{:.2f}'.format((row['ITM_EOD_CE_OI_Sum'] /
+          row['EOD_CE_OI_Sum'])*100|float) }}</span
+        >
+      </td>
+      <td>
+        <div data-number="{{ row['ITM_EOD_CE_OI_Change_Sum'] }}"></div>
+        <span
+          >{{ '{:.2f}'.format((row['ITM_EOD_CE_OI_Change_Sum'] /
+          row['ITM_EOD_CE_OI_Sum'])*100|float) }}</span
+        >
+      </td>
+      <td><div data-number="{{ row['EOD_PE_OI_Sum'] }}"></div></td>
+      <td>
+        <div data-number="{{ row['EOD_PE_OI_Change_Sum'] }}"></div>
+        <span
+          >{{ '{:.2f}'.format((row['EOD_PE_OI_Change_Sum'] /
+          row['EOD_PE_OI_Sum'])*100|float) }}</span
+        >
+      </td>
+      <td>
+        <div data-number="{{ row['ITM_EOD_PE_OI_Sum'] }}"></div>
+        <span
+          >{{ '{:.2f}'.format((row['ITM_EOD_PE_OI_Sum'] /
+          row['EOD_PE_OI_Sum'])*100|float) }}</span
+        >
+      </td>
+      <td>
+        <div data-number="{{ row['ITM_EOD_PE_OI_Change_Sum'] }}"></div>
+        <span
+          >{{ '{:.2f}'.format((row['ITM_EOD_PE_OI_Change_Sum'] /
+          row['ITM_EOD_PE_OI_Sum'])*100|float) }}</span
+        >
+      </td>
+    </tr>
+    {% endfor %}
+    <tr data-strike="{{date.split('__')[1]}}"></tr>
+    {% endfor %}
+  </tbody>
 </table>
+
 <script>
-    function updateQueryParam(value) {
-        const url = new URL(window.location);
-        url.searchParams.set('TckrSymb', value);
-        window.location.href = url.toString();
-    }
-    
-    document.addEventListener("DOMContentLoaded", () => {
-        const url = new URL(window.location);
-        let element = document.getElementById('TckrSymb');
-        element.value = url.searchParams.get('TckrSymb') || 'NIFTY';
+  function updateQueryParam(value) {
+      const url = new URL(window.location);
+      url.searchParams.set('TckrSymb', value);
+      window.location.href = url.toString();
+  }
 
-        {% if table %}
-            // Get all table rows
-            const rows = document.querySelectorAll("table tbody tr");
+  function generateTables(data) {
+      const container = document.createElement('div');
+      container.classList.add('strikes');
 
-            // Loop through each row and update cells
-            rows.forEach((row) => {
-                const numberCells = row.querySelectorAll("td[data-number]");
-                const dateCells = row.querySelectorAll("td[data-date]");
+      Object.keys(data).forEach(key => {
+          const expiryData = data[key];
+          const { Date: expiryDate, Strike, CE, PE } = expiryData;
 
-                numberCells.forEach((cell) => {
-                    const rawNumber = Math.round(parseFloat(cell.getAttribute("data-number")));
-                    // const formattedNumber = numberWithCommas(rawNumber);
-                    const formattedNumber = rawNumber.toLocaleString("en-IN", {
-                    maximumFractionDigits: 2,
-                    });
-                    cell.textContent = formattedNumber; // Update the text with the formatted number
+          // Create a table for both CE and PE
+          const createTable = (option, optionName) => {
+              const table = document.createElement('table');
+              table.classList.add('option-table');
+
+              // Create table caption
+              const caption = document.createElement('caption');
+              caption.innerHTML = `${optionName} Strikes on <strong>${expiryDate}</strong> for <b>${Strike}</b>`;
+              table.appendChild(caption);
+
+              // Create table header (thead)
+              const thead = document.createElement('thead');
+              const headerRow = document.createElement('tr');
+              const thStrike = document.createElement('th');
+              thStrike.textContent = 'Strike';
+              const thEODOIChng = document.createElement('th');
+              thEODOIChng.textContent = 'EOD OI Change';
+              headerRow.appendChild(thStrike);
+              headerRow.appendChild(thEODOIChng);
+              thead.appendChild(headerRow);
+              table.appendChild(thead);
+
+              // Create table body (tbody)
+              const tbody = document.createElement('tbody');
+              if(option.length) {
+                option.forEach(item => {
+                    const row = document.createElement('tr');
+                    const tdStrike = document.createElement('td');
+                    tdStrike.textContent = item.StrkPric;
+                    const tdEODOIChng = document.createElement('td');
+                    tdEODOIChng.textContent = formatNumber(item.EODOIChng);
+                    row.appendChild(tdStrike);
+                    row.appendChild(tdEODOIChng);
+                    tbody.appendChild(row);
                 });
+              } else {
+                    const row = document.createElement('tr');
+                    const col = document.createElement('td');
+                    col.setAttribute('colspan', 2);
+                    col.innerHTML = `No Records Found`;
+                    row.append(col);
+                    tbody.appendChild(row);
+              }
+              table.appendChild(tbody);
+              return table;
+          };
 
-                dateCells.forEach((cell) => {
-                    const date = new Date(cell.getAttribute("data-date"));
-                    cell.textContent = `Date: ${date.toLocaleString('en-gb', { year: 'numeric', month: 'numeric', day: 'numeric' })}`;
-                });
-            });
-            const resultRows = JSON.parse('{{ table | tojson | safe }}');
-            console.log('resultRows', resultRows);
-        {% endif %}
-    });
+          const ceTable = createTable(CE, 'CE');
+          const peTable = createTable(PE, 'PE');
+          container.appendChild(ceTable);
+          container.appendChild(peTable);
+      });
+      return container;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+      const url = new URL(window.location);
+      let element = document.getElementById('TckrSymb');
+      element.value = url.searchParams.get('TckrSymb') || 'NIFTY';
+
+      {% if table %}
+          // Get all table rows
+          const rows = document.querySelectorAll("table tbody tr");
+
+          // Loop through each row and update cells
+          rows.forEach((row) => {
+              const numberCells = row.querySelectorAll("[data-number]");
+              const dateCells = row.querySelectorAll("[data-date]");
+
+              numberCells.forEach((cell) => {
+                  cell.textContent = formatNumber(cell.getAttribute("data-number")); // Update the text with the formatted number
+              });
+
+              dateCells.forEach((cell) => {
+                  cell.textContent = formatDate(cell.getAttribute("data-date"));
+              });
+          });
+          const resultRows = JSON.parse('{{ table | tojson | safe }}');
+          console.log('resultRows', resultRows);
+
+          document.addEventListener('click', (event) => {
+              const isButton = event.target.nodeName === 'BUTTON';
+              if (!isButton) {
+                return;
+              }
+              const strike = event.target.dataset.strike;
+              console.log('selected strike', strike);
+              const targetRow = document.querySelector(`tr[data-strike="${strike}"]`);
+              const targetColumn = document.createElement('td');
+              targetColumn.setAttribute('colspan', 11);
+              targetColumn.innerHTML = `Loading`;
+              targetRow.append(targetColumn);
+              fetch(`/get-data/${strike}`).then((response) => {
+                  return response.json();
+              }).then(data => {
+                console.log(data);
+                if(data.message) {
+                    targetColumn.innerHTML = `<i>${data.message}</i>`;
+                } else {
+  			targetColumn.innerHTML = '';
+                    const container = generateTables(data);
+                    targetColumn.append(container);
+                }
+              })
+          })
+      {% endif %}
+  });
 </script>
 {% endblock %}

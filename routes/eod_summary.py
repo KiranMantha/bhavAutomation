@@ -7,12 +7,45 @@ from routes.supabase_client import get_supabase_instance
 eod_summary = Blueprint('eod_summary', __name__)
 supabase = get_supabase_instance()
 
+def transform_and_save_options(data):
+    records = []
+    for expiry_key, expiry_value in data.items():
+        strike = expiry_value["Strike"]
+        date_column = "Weekly_XpryDt" if expiry_key == "XpryDt1" else "Monthly_XpryDt"
+
+        for option_type in ["CE", "PE"]:
+            for record in expiry_value[option_type]:
+                transformed_record = {
+                    "Spot": strike,
+                    "Option": option_type,
+                    "Strike": record["StrkPric"],
+                    "EOD_OI_Change": record["EODOIChng"],
+                    date_column: datetime.strptime(expiry_value["Date"], "%d/%m/%y").strftime("%Y-%m-%d")
+                }
+                records.append(transformed_record)
+
+    # Insert records into Supabase
+    response = supabase.table("EOD_OPTIONS_SUMMARY").insert(records).execute()
+    return response
+
 @eod_summary.route('/')
 def index():
     return render_template('index.html')
 
 @eod_summary.route('/', methods=['POST'])
 def uploadFiles():
+    def set_is_selected(records, strike_price, condition):
+        """
+        Helper function to set isSelectedRecord for records based on a condition.
+        :param records: List of dictionaries containing option data
+        :param strike_price: The strike price to compare
+        :param condition: A lambda function to determine if the record meets the condition
+        :return: Updated list of records with isSelectedRecord added
+        """
+        for record in records:
+            record['isSelectedRecord'] = condition(record['StrkPric'], strike_price)
+        return records
+    
     if 'file' not in request.files:
         return "No file uploaded", 400
 
@@ -74,8 +107,16 @@ def uploadFiles():
             toprecords['XpryDt1'] = {
                 'Strike': strike_price,
                 'Date': XpryDt1,
-                'CE': ce_xpry_dt1[['StrkPric', 'EODOIChng']].to_dict('records'),
-                'PE': pe_xpry_dt1[['StrkPric', 'EODOIChng']].to_dict('records')
+                'CE': set_is_selected(
+                    ce_xpry_dt1[['StrkPric', 'EODOIChng']].to_dict('records'),
+                    strike_price,
+                    lambda strk, strike: strk < strike
+                ),
+                'PE': set_is_selected(
+                    pe_xpry_dt1[['StrkPric', 'EODOIChng']].to_dict('records'),
+                    strike_price,
+                    lambda strk, strike: strk > strike
+                )
             }
             expiry_groups.append({'Expiry': 'Weekly', 'XpryDt': XpryDt1})
             
@@ -83,8 +124,16 @@ def uploadFiles():
         toprecords['XpryDt2'] =  {
             'Strike': strike_price,
             'Date': XpryDt2,
-            'CE': ce_xpry_dt2[['StrkPric', 'EODOIChng']].to_dict('records'),
-            'PE': pe_xpry_dt2[['StrkPric', 'EODOIChng']].to_dict('records')
+            'CE': set_is_selected(
+                    ce_xpry_dt2[['StrkPric', 'EODOIChng']].to_dict('records'),
+                    strike_price,
+                    lambda strk, strike: strk < strike
+                ),
+                'PE': set_is_selected(
+                    pe_xpry_dt2[['StrkPric', 'EODOIChng']].to_dict('records'),
+                    strike_price,
+                    lambda strk, strike: strk > strike
+                )
         }
         expiry_groups.append({'Expiry': 'Monthly', 'XpryDt': XpryDt2})
         
@@ -143,17 +192,21 @@ def uploadFiles():
 def save():
     # Receive JSON data from the frontend
     result_rows = request.json.get('rows', [])
+    toprecords = request.json.get('toprecords', {})
+    
+    transform_and_save_options(toprecords)
 
-     # Insert the data into Supabase table
+    # Insert the data into Supabase table
     response = supabase.table("EOD_SUMMARY").insert(result_rows).execute()
     
     # Cleanup: Delete records older than 10 days
     twenty_days_ago = datetime.now(timezone.utc) - timedelta(days=20)
-    delete_response = supabase.table('EOD_SUMMARY').delete().lt('CREATED_AT', twenty_days_ago).execute()
-    
+    delete_response1 = supabase.table('EOD_SUMMARY').delete().lt('CREATED_AT', twenty_days_ago).execute()
+    delete_response2 = supabase.table('EOD_OPTIONS_SUMMARY').delete().lt('CREATED_AT', twenty_days_ago).execute()
+    # return jsonify({'message': 'Failed to save data!'}), 200
     if response.data:
         return jsonify({'message': 'Data saved successfully!', 
                         'inserted_data': response.data,
-                        'deleted_data': delete_response.data}), 200
+                        'deleted_data': [delete_response1.data, delete_response2.data]}), 200
     else:
         return jsonify({'message': 'Failed to save data!'}), 400

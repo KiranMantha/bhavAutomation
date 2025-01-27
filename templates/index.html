@@ -57,6 +57,19 @@
 {% endif %}
 
 <script>
+  function extractIsSelectedRecords(toprecords) {
+    const result = {};
+    for (const [expiryKey, expiryValue] of Object.entries(toprecords)) {
+      result[expiryKey] = {
+        Strike: expiryValue.Strike,
+        Date: expiryValue.Date,
+        CE: expiryValue.CE.filter(record => record.isSelectedRecord),
+        PE: expiryValue.PE.filter(record => record.isSelectedRecord),
+      };
+    }
+    return result;
+  }
+
   function displayTableContent() {
     {% if table %}
       // Get all table rows
@@ -67,19 +80,15 @@
         const cells = row.querySelectorAll("td[data-number]");
 
         cells.forEach((cell) => {
-          const rawNumber = Math.round(parseFloat(cell.getAttribute("data-number")));
-          // const formattedNumber = numberWithCommas(rawNumber);
-          const formattedNumber = rawNumber.toLocaleString("en-IN", {
-            maximumFractionDigits: 2,
-          });
-          cell.textContent = formattedNumber; // Update the text with the formatted number
+          cell.textContent = formatNumber(cell.getAttribute("data-number")); // Update the text with the formatted number
         });
       });
 
       const resultRows = JSON.parse('{{ table | tojson | safe }}');
-      console.log('{{ TckrSymb }}')
+      const topRecords = JSON.parse('{{ toprecords | tojson | safe }}');
       window.resultRows = resultRows;
-      {% endif %}
+      window.topRecords = extractIsSelectedRecords(topRecords);
+    {% endif %}
   }
 
   document.addEventListener("DOMContentLoaded", () => {

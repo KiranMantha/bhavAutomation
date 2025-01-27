@@ -59,6 +59,7 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         grid-gap: 20px;
+        align-items: flex-start;
         max-width: 80%;
         margin: auto;
         margin-top: 30px;
@@ -66,7 +67,34 @@
       .highlight {
         background-color: #ffff00;
       }
+      td .strikes {
+        margin-bottom: 30px;
+      }
+      #history td:not([colspan]) span {
+        font-size: 14px;
+        margin-top: 5px;
+        display: inline-block;
+        font-weight: bold;
+      }
     </style>
+    <script>
+      function formatNumber(val) {
+        const rawNumber = Math.round(parseFloat(val));
+        const formattedNumber = rawNumber.toLocaleString("en-IN", {
+          maximumFractionDigits: 2,
+        });
+        return formattedNumber; // Update the text with the formatted number
+      }
+
+      function formatDate(val) {
+        const date = new Date(val);
+        return `Date: ${date.toLocaleString("en-gb", {
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+        })}`;
+      }
+    </script>
   </head>
   <body>
     <nav>
