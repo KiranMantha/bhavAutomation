@@ -211,6 +211,7 @@ const history = (() => {
           const container = generateTables(data);
           targetColumn.append(container);
         }
+        document.querySelector(`button[data-strike="${strike}"]`).setAttribute('disabled', 'disabled');
       });
   }
 

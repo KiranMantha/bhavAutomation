@@ -2,7 +2,7 @@
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 body {
   padding: 0 20px;
@@ -60,6 +60,11 @@ button {
   color: #fff;
   cursor: pointer;
   text-transform: capitalize;
+}
+button[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 table {
   width: 100%;
