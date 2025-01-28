@@ -1,58 +1,61 @@
-{% extends "base.html" %}
-
-{% block title %}CSV Upload and Results{% endblock %}
-
+{% extends "base.html" %} {% block title %}CSV Upload and Results{% endblock %}
 {% block content %}
 <div class="card">
   <h2>Upload CSV and Process Data</h2>
   <form id="csvForm" method="post" enctype="multipart/form-data">
-    <div>
-      <label for="TckrSymb">Ticker Symbol:</label>
-      <select id="TckrSymb" name="TckrSymb">
-        <option value="NIFTY">NIFTY</option>
-        <option value="BANKNIFTY">BANKNIFTY</option>
-      </select>
-    </div>
-    <div>
-      <label for="strike_price">Current Strike Price:</label>
-      <input
-        type="number"
-        id="strike_price"
-        name="strike_price"
-        step="0.01"
-        placeholder="e.g., 24000"
-      />
-    </div>
-    <div>
-      <label for="XpryDt1">Weekly Expiry Date:</label>
-      <input type="date" id="XpryDt1" name="XpryDt1" />
-    </div>
-    <div>
-      <label for="XpryDt2">Monthly Expiry Date:</label>
-      <input type="date" id="XpryDt2" name="XpryDt2" />
-    </div>
-    <div>
-      <input type="file" id="csv" name="file" />
-    </div>
+    <table class="table-clean">
+      <tbody>
+        <tr>
+          <td>
+            <label for="TckrSymb">Ticker Symbol:</label>
+          </td>
+          <td>
+            <select id="TckrSymb" name="TckrSymb" class="form-control">
+              <option value="NIFTY">NIFTY</option>
+              <option value="BANKNIFTY">BANKNIFTY</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td><label for="strike_price">Current Strike Price:</label></td>
+          <td>
+            <input
+              type="number"
+              id="strike_price"
+              name="strike_price" class="form-control"
+              step="0.01"
+              placeholder="e.g., 24000"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td><label for="XpryDt1">Weekly Expiry Date:</label></td>
+          <td><input type="date" id="XpryDt1" name="XpryDt1"  class="form-control"/></td>
+        </tr>
+        <tr>
+          <td><label for="XpryDt2">Monthly Expiry Date:</label></td>
+          <td><input type="date" id="XpryDt2" name="XpryDt2"  class="form-control"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><input type="file" id="csv" name="file" /></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button type="submit" form="csvForm">Upload and Process</button>
+            <button onclick="window.location.pathname = '/'">Reset</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </form>
-  <button type="submit" form="csvForm">Upload and Process</button>
-  <button onclick="window.location.pathname = '/'">Reset</button>
 </div>
 
-{% if table %}
-  {% set context = {'dataset': table, 'ticker_symbol': TckrSymb} %}
-  {% include 'eod-summary.html' with context %}
-{% endif %} 
-
-{% if toprecords %}
+{% if table %} {% set context = {'dataset': table, 'ticker_symbol': TckrSymb} %}
+{% include 'eod-summary.html' with context %} {% endif %} {% if toprecords %}
 <div class="strikes">
-  {% if toprecords.XpryDt1 %}
-    {% set dataset = toprecords.XpryDt1 %}
-    {% include 'strikes-table.html' %}
-  {% endif %}
-
-  {% set dataset = toprecords.XpryDt2 %}
-  {% include 'strikes-table.html' %}
+  {% if toprecords.XpryDt1 %} {% set dataset = toprecords.XpryDt1 %} {% include
+  'strikes-table.html' %} {% endif %} {% set dataset = toprecords.XpryDt2 %} {%
+  include 'strikes-table.html' %}
 </div>
 {% endif %}
 

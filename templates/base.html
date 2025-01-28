@@ -13,6 +13,8 @@
       }
       body {
         padding: 0 20px;
+        background-color: #fafafa;
+        color: #171717;
       }
       nav {
         position: fixed;
@@ -22,21 +24,42 @@
         padding: 0 20px;
         display: flex;
         gap: 20px;
-        background: #fff;
+        background: #fafafa;
       }
       h2 {
         text-align: center;
       }
       .card {
-        max-width: 500px;
+        max-width: 365px;
         margin: auto;
       }
       form > div {
         margin-bottom: 10px;
       }
+      .form-control {
+        padding: 3px 6px;
+        border-radius: 2px;
+        border: 1px solid;
+        outline: none;
+      }
+      button {
+        border: 1px solid #171717;
+        border-radius: 6px;
+        padding: 6px 10px;
+        background: #171717;
+        color: #fff;
+        cursor: pointer;
+        text-transform: capitalize;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
+      }
+      table.table-clean,
+      table.table-clean th,
+      table.table-clean td {
+        border: none;
+        text-align: left;
       }
       table,
       th,
