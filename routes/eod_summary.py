@@ -179,9 +179,6 @@ def uploadFiles():
                 'ITM_EOD_PE_OI_Change_Sum': itm_pe_eod_chng_sum
             })
 
-        # Create DataFrame for results
-        final_table = pd.DataFrame(result_rows)
-
         # Return the tables as response
         return render_template('index.html', TckrSymb=TckrSymb_input, table=result_rows, toprecords=toprecords)
 

@@ -60,59 +60,13 @@
 {% endif %}
 
 <script>
-  function extractIsSelectedRecords(toprecords) {
-    const result = {};
-    for (const [expiryKey, expiryValue] of Object.entries(toprecords)) {
-      result[expiryKey] = {
-        Strike: expiryValue.Strike,
-        Date: expiryValue.Date,
-        CE: expiryValue.CE.filter(record => record.isSelectedRecord),
-        PE: expiryValue.PE.filter(record => record.isSelectedRecord),
-      };
-    }
-    return result;
-  }
-
-  function displayTableContent() {
+  common.onPageLoad(() => {
     {% if table %}
-      // Get all table rows
-      const rows = document.querySelectorAll("table tbody tr");
-
-      // Loop through each row and update cells
-      rows.forEach((row) => {
-        const cells = row.querySelectorAll("td[data-number]");
-
-        cells.forEach((cell) => {
-          cell.textContent = formatNumber(cell.getAttribute("data-number")); // Update the text with the formatted number
-        });
-      });
-
-      const resultRows = JSON.parse('{{ table | tojson | safe }}');
-      const topRecords = JSON.parse('{{ toprecords | tojson | safe }}');
-      window.resultRows = resultRows;
-      window.topRecords = extractIsSelectedRecords(topRecords);
+      common.formatTable(document.querySelectorAll("table tbody tr"));
+      window.resultRows = JSON.parse('{{ table | tojson | safe }}');
+      window.topRecords = home.extractIsSelectedRecords(JSON.parse('{{ toprecords | tojson | safe }}'));
     {% endif %}
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    displayTableContent();
-    const tickerSymbol = document.getElementById("TckrSymb");
-    const weeklyExpiry = document.getElementById("XpryDt1");
-
-    const updateFieldState = () => {
-      if (tickerSymbol.value === "BANKNIFTY") {
-        weeklyExpiry.disabled = true;
-      } else {
-        weeklyExpiry.disabled = false;
-      }
-      weeklyExpiry.value = ""; // Clear the value if any
-    };
-
-    // Initialize the state on page load
-    updateFieldState();
-
-    // Update the state whenever the ticker symbol changes
-    tickerSymbol.addEventListener("change", updateFieldState);
+    home.init();
   });
 </script>
 {% endblock %}

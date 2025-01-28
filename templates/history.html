@@ -2,11 +2,16 @@
 content %}
 <h2>
   History
-  <select name="TckrSymb" id="TckrSymb" class="form-control mini mx-8" onchange="updateQueryParam(this.value)">
+  <select
+    name="TckrSymb"
+    id="TckrSymb"
+    class="form-control mini mx-8"
+    onchange="history.updateQueryParam(this.value)"
+  >
     <option value="NIFTY">NIFTY</option>
     <option value="BANKNIFTY">BANKNIFTY</option>
   </select>
-  <button onclick="copyTableAsCSV('history')">copy as csv</button>
+  <button onclick="common.copyTableAsCSV('history')">copy as csv</button>
 </h2>
 <table id="history">
   <thead>
@@ -91,126 +96,23 @@ content %}
 </table>
 
 <script>
-  function updateQueryParam(value) {
-      const url = new URL(window.location);
-      url.searchParams.set('TckrSymb', value);
-      window.location.href = url.toString();
-  }
+  common.onPageLoad(() => {
+    const url = new URL(window.location);
+    let element = document.getElementById('TckrSymb');
+    element.value = url.searchParams.get('TckrSymb') || 'NIFTY';
 
-  function generateTables(data) {
-      const container = document.createElement('div');
-      container.classList.add('strikes');
+    {% if table %}
+      common.formatTable(document.querySelectorAll("table tbody tr"));
+    {% endif %}
+  });
 
-      Object.keys(data).forEach(key => {
-          const expiryData = data[key];
-          const { Date: expiryDate, Strike, CE, PE } = expiryData;
-
-          // Create a table for both CE and PE
-          const createTable = (option, optionName) => {
-              const table = document.createElement('table');
-              table.classList.add('option-table');
-
-              // Create table caption
-              const caption = document.createElement('caption');
-              caption.innerHTML = `${optionName} Strikes on <strong>${expiryDate}</strong> for <b>${Strike}</b>`;
-              table.appendChild(caption);
-
-              // Create table header (thead)
-              const thead = document.createElement('thead');
-              const headerRow = document.createElement('tr');
-              const thStrike = document.createElement('th');
-              thStrike.textContent = 'Strike';
-              const thEODOIChng = document.createElement('th');
-              thEODOIChng.textContent = 'EOD OI Change';
-              headerRow.appendChild(thStrike);
-              headerRow.appendChild(thEODOIChng);
-              thead.appendChild(headerRow);
-              table.appendChild(thead);
-
-              // Create table body (tbody)
-              const tbody = document.createElement('tbody');
-              if(option.length) {
-                option.forEach(item => {
-                    const row = document.createElement('tr');
-                    const tdStrike = document.createElement('td');
-                    tdStrike.textContent = item.StrkPric;
-                    const tdEODOIChng = document.createElement('td');
-                    tdEODOIChng.textContent = formatNumber(item.EODOIChng);
-                    row.appendChild(tdStrike);
-                    row.appendChild(tdEODOIChng);
-                    tbody.appendChild(row);
-                });
-              } else {
-                    const row = document.createElement('tr');
-                    const col = document.createElement('td');
-                    col.setAttribute('colspan', 2);
-                    col.innerHTML = `No Records Found`;
-                    row.append(col);
-                    tbody.appendChild(row);
-              }
-              table.appendChild(tbody);
-              return table;
-          };
-
-          const ceTable = createTable(CE, 'CE');
-          const peTable = createTable(PE, 'PE');
-          container.appendChild(ceTable);
-          container.appendChild(peTable);
-      });
-      return container;
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-      const url = new URL(window.location);
-      let element = document.getElementById('TckrSymb');
-      element.value = url.searchParams.get('TckrSymb') || 'NIFTY';
-
-      {% if table %}
-          // Get all table rows
-          const rows = document.querySelectorAll("table tbody tr");
-
-          // Loop through each row and update cells
-          rows.forEach((row) => {
-              const numberCells = row.querySelectorAll("[data-number]");
-              const dateCells = row.querySelectorAll("[data-date]");
-
-              numberCells.forEach((cell) => {
-                  cell.textContent = formatNumber(cell.getAttribute("data-number")); // Update the text with the formatted number
-              });
-
-              dateCells.forEach((cell) => {
-                  cell.textContent = formatDate(cell.getAttribute("data-date"));
-              });
-          });
-          const resultRows = JSON.parse('{{ table | tojson | safe }}');
-          console.log('resultRows', resultRows);
-
-          document.addEventListener('click', (event) => {
-              const isButton = event.target.nodeName === 'BUTTON';
-              if (!isButton) {
-                return;
-              }
-              const strike = event.target.dataset.strike;
-              console.log('selected strike', strike);
-              const targetRow = document.querySelector(`tr[data-strike="${strike}"]`);
-              const targetColumn = document.createElement('td');
-              targetColumn.setAttribute('colspan', 11);
-              targetColumn.innerHTML = `Loading`;
-              targetRow.append(targetColumn);
-              fetch(`/get-data/${strike}`).then((response) => {
-                  return response.json();
-              }).then(data => {
-                console.log(data);
-                if(data.message) {
-                    targetColumn.innerHTML = `<i>${data.message}</i>`;
-                } else {
-  			targetColumn.innerHTML = '';
-                    const container = generateTables(data);
-                    targetColumn.append(container);
-                }
-              })
-          })
-      {% endif %}
+  document.addEventListener('click', (event) => {
+    const isButton = event.target.nodeName === 'BUTTON';
+    const strike = event.target.dataset.strike;
+    if (!isButton || !strike) {
+      return;
+    }
+    history.fetchOptionsData(strike);
   });
 </script>
 {% endblock %}

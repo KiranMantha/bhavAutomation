@@ -1,5 +1,5 @@
 <div>
-  <h2>EOD Summary For {{ context.ticker_symbol }} <button onclick="copyTableAsCSV('finalTable')">copy as csv</button> <button onclick="saveEodSummary()">Save</button></h2>
+  <h2>EOD Summary For {{ context.ticker_symbol }} <button onclick="common.copyTableAsCSV('finalTable')">copy as csv</button> <button onclick="home.saveEodSummary()">Save</button></h2>
   <table id="finalTable">
     <thead>
       <tr>
@@ -35,31 +35,3 @@
     </tbody>
   </table>
 </div>
-<script>
-  async function saveEodSummary() {
-    try {
-      // Log the result_rows to the browser console
-      console.log('Rows to be saved:', window.resultRows);
-
-      // Send the result_rows to the backend
-      const response = await fetch('/saveeodsummary', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ rows: window.resultRows, toprecords: window.topRecords })
-      });
-
-      const result = await response.json();
-
-      // Log the server response
-      console.log('Server response:', result);
-
-      // Notify the user
-      alert(result.message);
-    } catch (error) {
-      console.error('Error saving data:', error);
-      alert('Failed to save data.');
-    }
-  }
-</script>
