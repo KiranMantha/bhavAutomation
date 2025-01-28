@@ -200,9 +200,9 @@ def save():
     response = supabase.table("EOD_SUMMARY").insert(result_rows).execute()
     
     # Cleanup: Delete records older than 10 days
-    twenty_days_ago = datetime.now(timezone.utc) - timedelta(days=20)
-    delete_response1 = supabase.table('EOD_SUMMARY').delete().lt('CREATED_AT', twenty_days_ago).execute()
-    delete_response2 = supabase.table('EOD_OPTIONS_SUMMARY').delete().lt('CREATED_AT', twenty_days_ago).execute()
+    ten_days_ago = datetime.now(timezone.utc) - timedelta(days=10)
+    delete_response1 = supabase.table('EOD_SUMMARY').delete().lt('CREATED_AT', ten_days_ago).execute()
+    delete_response2 = supabase.table('EOD_OPTIONS_SUMMARY').delete().lt('CREATED_AT', ten_days_ago).execute()
     # return jsonify({'message': 'Failed to save data!'}), 200
     if response.data:
         return jsonify({'message': 'Data saved successfully!', 
