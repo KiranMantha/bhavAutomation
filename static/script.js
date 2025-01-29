@@ -1,20 +1,20 @@
 const common = (() => {
-  function onPageLoad(cb) {
+  function onPageLoad(callbackFn) {
     document.addEventListener("DOMContentLoaded", () => {
-      cb();
+      callbackFn();
     });
   }
 
-  function formatNumber(val) {
-    const rawNumber = Math.round(parseFloat(val));
+  function formatNumber(value) {
+    const rawNumber = Math.round(parseFloat(value));
     const formattedNumber = rawNumber.toLocaleString("en-IN", {
       maximumFractionDigits: 2,
     });
     return formattedNumber; // Update the text with the formatted number
   }
 
-  function formatDate(val) {
-    const date = new Date(val);
+  function formatDate(value) {
+    const date = new Date(value);
     return `Date: ${date.toLocaleString("en-gb", {
       year: "numeric",
       month: "numeric",
@@ -22,9 +22,9 @@ const common = (() => {
     })}`;
   }
 
-  function formatTable(rows) {
+  function formatTable(tableRows) {
     // Loop through each row and update cells
-    rows.forEach((row) => {
+    tableRows.forEach((row) => {
       const numberCells = row.querySelectorAll("[data-number]");
       const dateCells = row.querySelectorAll("[data-date]");
 
@@ -39,8 +39,8 @@ const common = (() => {
   }
 
   // Function to copy the HTML table as CSV to the clipboard
-  function copyTableAsCSV(tableid) {
-    let table = document.querySelector(`#${tableid}`).outerHTML;
+  function copyTableAsCSV(tableId) {
+    let table = document.querySelector(`#${tableId}`).outerHTML;
     table = table
       .replaceAll("\n", '<br style="mso-data-placement:same-cell;"/>') // new lines inside html cells => Alt+Enter in Excel
       .replaceAll("<td", '<td style="vertical-align: top;"'); // align top
@@ -138,7 +138,7 @@ const history = (() => {
       const { Date: expiryDate, Strike, CE, PE } = expiryData;
 
       // Create a table for both CE and PE
-      const createTable = (option, optionName) => {
+      const createTable = (optionName, optionItems) => {
         const table = document.createElement("table");
         table.classList.add("option-table");
 
@@ -149,43 +149,31 @@ const history = (() => {
 
         // Create table header (thead)
         const thead = document.createElement("thead");
-        const headerRow = document.createElement("tr");
-        const thStrike = document.createElement("th");
-        const thEODOIChng = document.createElement("th");
-        thStrike.textContent = "Strike";
-        thEODOIChng.textContent = "EOD OI Change";
-        headerRow.appendChild(thStrike);
-        headerRow.appendChild(thEODOIChng);
-        thead.appendChild(headerRow);
+        thead.innerHTML = `<tr>
+          <th>Strike</th>
+          <th>EOD OI Change</th>
+        </tr>`
         table.appendChild(thead);
 
         // Create table body (tbody)
         const tbody = document.createElement("tbody");
-        if (option.length) {
-          option.forEach((item) => {
+        if (optionItems.length) {
+          optionItems.forEach((item) => {
             const row = document.createElement("tr");
-            const tdStrike = document.createElement("td");
-            const tdEODOIChng = document.createElement("td");
-            tdStrike.textContent = item.StrkPric;
-            tdEODOIChng.textContent = common.formatNumber(item.EODOIChng);
-            row.appendChild(tdStrike);
-            row.appendChild(tdEODOIChng);
+            row.innerHTML = `<td>${item.StrkPric}</td><td>${common.formatNumber(item.EODOIChng)}</td>`
             tbody.appendChild(row);
           });
         } else {
           const row = document.createElement("tr");
-          const col = document.createElement("td");
-          col.setAttribute("colspan", 2);
-          col.innerHTML = `No Records Found`;
-          row.append(col);
+          row.innerHTML = `<td colspan="2">No Records Found</td>`;
           tbody.appendChild(row);
         }
         table.appendChild(tbody);
         return table;
       };
 
-      const ceTable = createTable(CE, "CE");
-      const peTable = createTable(PE, "PE");
+      const ceTable = createTable("CE", CE);
+      const peTable = createTable("PE", PE);
       container.appendChild(ceTable);
       container.appendChild(peTable);
     });
