@@ -87,6 +87,7 @@ def uploadFiles():
         strike_price = int(request.form.get('strike_price', default=0))
         XpryDt1 = request.form.get('XpryDt1')  # YYYY-MM-DD format
         XpryDt2 = request.form.get('XpryDt2')  # YYYY-MM-DD format
+        FileDt = request.form.get('FileDt') # YYYY-MM-DD format
 
         # Convert request expiry dates to datetime objects (same format as in the CSV)
         XpryDt1 = datetime.strptime(XpryDt1, '%Y-%m-%d').strftime('%d/%m/%y') if TckrSymb_input == 'NIFTY' else None
@@ -193,6 +194,7 @@ def uploadFiles():
             result_rows.append({
                 'Expiry': expiry,
                 'TckrSymb': TckrSymb_input,
+                'FileDt': FileDt,
                 'Expiry_Date': expiry_date,
                 'Strike': strike_price,
                 'EOD_CE_OI_Sum': ce_eod_sum,

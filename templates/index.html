@@ -29,6 +29,10 @@
           </td>
         </tr>
         <tr>
+          <td><label for="FileDt">File Date(Optional. Use it if uploading old file):</label></td>
+          <td><input type="date" id="FileDt" name="FileDt"  class="form-control"/></td>
+        </tr>
+        <tr>
           <td><label for="XpryDt1">Weekly Expiry Date:</label></td>
           <td><input type="date" id="XpryDt1" name="XpryDt1"  class="form-control"/></td>
         </tr>
@@ -42,7 +46,7 @@
         <tr>
           <td colspan="2">
             <button type="submit" form="csvForm">Upload and Process</button>
-            <button onclick="window.location.pathname = '/'">Reset</button>
+            <button type="button" onclick="window.location.href = window.location.pathname;">Reset</button>
           </td>
         </tr>
       </tbody>

@@ -26,12 +26,17 @@ def index():
     
     for row in data:
         # Convert `created_at` to a date object
-        created_date = datetime.fromisoformat(row['CREATED_AT']).date()
+        created_date = row['FileDt'] if row['FileDt'] else datetime.fromisoformat(row['CREATED_AT']).date()
         key = f"{created_date}__{row['Strike']}"
         grouped_data[key].append(row)
         
-    # Convert defaultdict to a regular dict for passing to the template
-    grouped_data = {key: rows for key, rows in grouped_data.items()}
+    # Convert defaultdict to a regular dict with sorted data based on created_date for passing to the template
+    grouped_data = dict(
+        sorted(
+            grouped_data.items(),
+            key=lambda x: (datetime.fromisoformat(x[0].split('__')[0]).date(), x[0].split('__')[1])
+        )
+    )
     
     # Pass the grouped data to the template
     return render_template('history.html', table=grouped_data)
