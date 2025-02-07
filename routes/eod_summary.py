@@ -2,10 +2,35 @@ from flask import Blueprint, render_template, request, jsonify
 from datetime import datetime, timezone, timedelta
 import pandas as pd
 from routes.supabase_client import get_supabase_instance
+import traceback
+import csv
 
 # Create Blueprint for the route
 eod_summary = Blueprint('eod_summary', __name__)
 supabase = get_supabase_instance()
+
+def detect_delimiter(file):
+    """Detect delimiter in an uploaded CSV file"""
+    sample_bytes = file.read(1024)  # Read first 1024 bytes as bytes
+    file.seek(0)  # Reset file pointer
+    try:
+        sample = sample_bytes.decode("utf-8")  # Decode to string
+    except UnicodeDecodeError:
+        sample = sample_bytes.decode("ISO-8859-1")  # Fallback to another encoding
+    if not sample.strip():
+        raise ValueError("Empty file provided")
+    try:
+        return csv.Sniffer().sniff(sample).delimiter
+    except csv.Error:
+        print("Warning: Could not determine delimiter. Checking manually...")
+        delimiters = [',', '\t', ';', '|']
+        counts = {d: sample.count(d) for d in delimiters}
+        best_guess = max(counts, key=counts.get)
+        print('best_guess', best_guess)
+        if counts[best_guess] > 0:
+            return best_guess
+        raise ','
+
 
 def transform_and_save_options(data):
     records = []
@@ -76,7 +101,8 @@ def uploadFiles():
             return "Monthly expiry date is required for BankNifty.", 400
 
         # Load the CSV into a Pandas DataFrame
-        df = pd.read_csv(file)
+        seperator = detect_delimiter(file)
+        df = pd.read_csv(file, sep=seperator)
 
         # Add EODOI and EODOIChng columns
         df['EODOI'] = df['OpnIntrst'] * df['ClsPric']
@@ -183,6 +209,8 @@ def uploadFiles():
         return render_template('index.html', TckrSymb=TckrSymb_input, table=result_rows, toprecords=toprecords)
 
     except Exception as e:
+        print("Error occurred:", e)
+        print(traceback.format_exc())
         return f"Error processing the file: {e}", 500
 
 @eod_summary.route('/saveeodsummary', methods=['POST'])
