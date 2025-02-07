@@ -71,7 +71,8 @@ button[disabled] {
 }
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 table.table-clean,
 table.table-clean th,
@@ -82,10 +83,16 @@ table.table-clean td {
 table.table-clean tr:last-child td {
   text-align: center;
 }
-table,
-th,
-td {
+table {
+  border-left: 1px solid #bbb;
+}
+table th {
   border: 1px solid #bbb;
+  border-left: none;
+}
+table td {
+  border-bottom: 1px solid #bbb;
+  border-right: 1px solid #bbb;
 }
 th,
 td {
@@ -98,6 +105,11 @@ th {
 }
 td[colspan] {
   text-align: left;
+}
+.table-sticky thead tr {
+  position: sticky;
+  top: 19px;
+  z-index: 1;
 }
 .strikes {
   display: grid;
