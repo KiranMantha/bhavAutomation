@@ -180,18 +180,19 @@ const history = (() => {
     return container;
   }
 
-  function fetchOptionsData(strike) {
+  function fetchOptionsData(targetButton, strike) {
+    const targetButtonText = targetButton.innerText;
     const targetRow = document.querySelector(`tr[data-strike="${strike}"]`);
     const targetColumn = document.createElement("td");
     targetColumn.setAttribute("colspan", 11);
     targetColumn.innerHTML = `Loading`;
     targetRow.append(targetColumn);
+    targetButton.innerText = 'Loading';
     fetch(`/get-data/${strike}`)
       .then((response) => {
         return response.json();
       })
       .then((data) => {
-        console.log(data);
         if (data.message) {
           targetColumn.innerHTML = `<i>${data.message}</i>`;
         } else {
@@ -199,7 +200,7 @@ const history = (() => {
           const container = generateTables(data);
           targetColumn.append(container);
         }
-        document.querySelector(`button[data-strike="${strike}"]`).setAttribute('disabled', 'disabled');
+        targetButton.innerText = targetButtonText;
       });
   }
 

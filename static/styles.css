@@ -133,3 +133,7 @@ td .strikes {
   display: inline-block;
   font-weight: bold;
 }
+
+#history button[data-strike] {
+  width: 140px;
+}

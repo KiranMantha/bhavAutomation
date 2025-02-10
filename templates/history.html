@@ -112,7 +112,8 @@ content %}
     if (!isButton || !strike) {
       return;
     }
-    history.fetchOptionsData(strike);
+    event.target.setAttribute('disabled', true);
+    history.fetchOptionsData(event.target, strike);
   });
 </script>
 {% endblock %}
