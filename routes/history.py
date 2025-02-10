@@ -34,8 +34,7 @@ def index():
     grouped_data = dict(
         sorted(
             grouped_data.items(),
-            key=lambda x: (datetime.fromisoformat(x[0].split('__')[0]).date(), x[0].split('__')[1]),
-            reverse=True
+            key=lambda x: (datetime.fromisoformat(x[0].split('__')[0]).date(), x[0].split('__')[1])
         )
     )
     
