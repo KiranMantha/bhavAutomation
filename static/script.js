@@ -88,7 +88,9 @@ const home = (() => {
     return result;
   }
 
-  async function saveEodSummary() {
+  async function saveEodSummary(target) {
+    target.innerText = 'Saving';
+    target.setAttribute('disabled', true);
     try {
       // Log the result_rows to the browser console
       console.log("Rows to be saved:", window.resultRows);
@@ -115,6 +117,8 @@ const home = (() => {
     } catch (error) {
       console.error("Error saving data:", error);
       alert("Failed to save data.");
+      target.innerText = 'Save';
+      target.removeAttribute('disabled');
     }
   }
 

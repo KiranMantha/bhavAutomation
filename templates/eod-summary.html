@@ -1,5 +1,5 @@
 <div>
-  <h2>EOD Summary For {{ context.ticker_symbol }} <button onclick="common.copyTableAsCSV('finalTable')">copy as csv</button> <button onclick="home.saveEodSummary()">Save</button></h2>
+  <h2>EOD Summary For {{ context.ticker_symbol }} <button onclick="common.copyTableAsCSV('finalTable')">copy as csv</button> <button onclick="home.saveEodSummary(this)">Save</button></h2>
   <table id="finalTable">
     <thead>
       <tr>
