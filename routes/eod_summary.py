@@ -9,6 +9,7 @@ import csv
 eod_summary = Blueprint('eod_summary', __name__)
 supabase = get_supabase_instance()
 
+# Not going to use this but keeping this for future purpose
 def detect_delimiter(file):
     """Detect delimiter in an uploaded CSV file"""
     sample_bytes = file.read(1024)  # Read first 1024 bytes as bytes
@@ -102,8 +103,7 @@ def uploadFiles():
             return "Monthly expiry date is required for BankNifty.", 400
 
         # Load the CSV into a Pandas DataFrame
-        seperator = detect_delimiter(file)
-        df = pd.read_csv(file, sep=seperator)
+        df = pd.read_csv(file, sep=None, engine='python')
 
         # Add EODOI and EODOIChng columns
         df['EODOI'] = df['OpnIntrst'] * df['ClsPric']
