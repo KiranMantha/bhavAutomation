@@ -114,6 +114,7 @@ const home = (() => {
 
       // Notify the user
       alert(result.message);
+      target.innerText = 'Saved';
     } catch (error) {
       console.error("Error saving data:", error);
       alert("Failed to save data.");
