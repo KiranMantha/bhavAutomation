@@ -87,6 +87,9 @@ table.table-clean tr:last-child td {
 table {
   border-left: 1px solid #bbb;
 }
+table caption {
+  margin-bottom: 5px;
+}
 table th {
   border: 1px solid #bbb;
   border-left: none;

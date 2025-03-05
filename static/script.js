@@ -200,12 +200,13 @@ const history = (() => {
       .then((data) => {
         if (data.message) {
           targetColumn.innerHTML = `<i>${data.message}</i>`;
+          targetButton.innerText = targetButtonText;
         } else {
           targetColumn.innerHTML = "";
           const container = generateTables(data);
           targetColumn.append(container);
+          targetButton.innerText = 'Loaded';
         }
-        targetButton.innerText = targetButtonText;
       });
   }
 
