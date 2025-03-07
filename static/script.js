@@ -165,7 +165,7 @@ const history = (() => {
         if (optionItems.length) {
           optionItems.forEach((item) => {
             const row = document.createElement("tr");
-            row.innerHTML = `<td>${item.StrkPric}</td><td>${common.formatNumber(item.EODOIChng)}</td>`
+            row.innerHTML = `<td class='${item.isSelectedRecord ? 'highlight': ''}'>${item.StrkPric}</td><td>${common.formatNumber(item.EODOIChng)}</td>`
             tbody.appendChild(row);
           });
         } else {

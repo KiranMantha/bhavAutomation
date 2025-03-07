@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from datetime import datetime, timezone, timedelta
 import pandas as pd
 from routes.supabase_client import get_supabase_instance
+from routes.common import set_is_selected
 import traceback
 import csv
 
@@ -60,18 +61,6 @@ def index():
 
 @eod_summary.route('/', methods=['POST'])
 def uploadFiles():
-    def set_is_selected(records, strike_price, condition):
-        """
-        Helper function to set isSelectedRecord for records based on a condition.
-        :param records: List of dictionaries containing option data
-        :param strike_price: The strike price to compare
-        :param condition: A lambda function to determine if the record meets the condition
-        :return: Updated list of records with isSelectedRecord added
-        """
-        for record in records:
-            record['isSelectedRecord'] = condition(record['StrkPric'], strike_price)
-        return records
-    
     if 'file' not in request.files:
         return "No file uploaded", 400
 

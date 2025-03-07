@@ -68,7 +68,7 @@
     {% if table %}
       common.formatTable(document.querySelectorAll("table tbody tr"));
       window.resultRows = JSON.parse('{{ table | tojson | safe }}');
-      window.topRecords = home.extractIsSelectedRecords(JSON.parse('{{ toprecords | tojson | safe }}'));
+      window.topRecords = JSON.parse('{{ toprecords | tojson | safe }}');//home.extractIsSelectedRecords(JSON.parse('{{ toprecords | tojson | safe }}'));
     {% endif %}
     home.init();
   });

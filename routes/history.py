@@ -2,6 +2,7 @@ from flask import Blueprint, request, render_template, jsonify
 from collections import defaultdict
 from datetime import datetime
 from routes.supabase_client import get_supabase_instance
+from routes.common import set_is_selected
 
 # Create Blueprint for the route
 history = Blueprint('history', __name__)
@@ -84,8 +85,8 @@ def get_options_data(spot_value):
         result["XpryDt1"] = {
             "Strike": spot_value,
             "Date": xpry_dt_1,
-            "CE": data["XpryDt1"]["CE"],
-            "PE": data["XpryDt1"]["PE"],
+            "CE": set_is_selected(data["XpryDt1"]["CE"], spot_value, lambda strk, strike: strk < strike),
+            "PE": set_is_selected(data["XpryDt1"]["PE"], spot_value, lambda strk, strike: strk > strike),
         }
 
     # Add data for XpryDt2 if there are records for it
@@ -93,8 +94,8 @@ def get_options_data(spot_value):
         result["XpryDt2"] = {
             "Strike": spot_value,
             "Date": xpry_dt_2,
-            "CE": data["XpryDt2"]["CE"],
-            "PE": data["XpryDt2"]["PE"],
+            "CE": set_is_selected(data["XpryDt2"]["CE"], spot_value, lambda strk, strike: strk < strike),
+            "PE": set_is_selected(data["XpryDt2"]["PE"], spot_value, lambda strk, strike: strk > strike),
         }
 
     # If no data for XpryDt1 or XpryDt2, return an appropriate message
