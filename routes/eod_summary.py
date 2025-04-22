@@ -68,8 +68,8 @@ def uploadFiles():
     if file.filename == '':
         return "No file selected", 400
 
-    if not file.filename.endswith('.csv'):
-        return "Invalid file type. Please upload a CSV file.", 400
+    if not (file.filename.endswith('.csv') or file.filename.endswith('.txt')):
+        return "Invalid file type. Please upload a CSV or TXT file.", 400
 
     try:
         # Read inputs from the request
