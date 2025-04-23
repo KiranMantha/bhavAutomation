@@ -49,21 +49,21 @@ content %}
         <div data-number="{{ row['EOD_CE_OI_Change_Sum'] }}"></div>
         <span
           >{{ '{:.2f}'.format((row['EOD_CE_OI_Change_Sum'] /
-          row['EOD_CE_OI_Sum'])*100|float) }}</span
+          row['EOD_CE_OI_Sum'])*100|float) if row['EOD_CE_OI_Sum'] else '0.00' }}</span
         >
       </td>
       <td>
         <div data-number="{{ row['ITM_EOD_CE_OI_Sum'] }}"></div>
         <span
           >{{ '{:.2f}'.format((row['ITM_EOD_CE_OI_Sum'] /
-          row['EOD_CE_OI_Sum'])*100|float) }}</span
+          row['EOD_CE_OI_Sum'])*100|float) if row['EOD_CE_OI_Sum'] else '0.00' }}</span
         >
       </td>
       <td>
         <div data-number="{{ row['ITM_EOD_CE_OI_Change_Sum'] }}"></div>
         <span
           >{{ '{:.2f}'.format((row['ITM_EOD_CE_OI_Change_Sum'] /
-          row['ITM_EOD_CE_OI_Sum'])*100|float) }}</span
+          row['ITM_EOD_CE_OI_Sum'])*100|float) if row['ITM_EOD_CE_OI_Sum'] else '0.00' }}</span
         >
       </td>
       <td><div data-number="{{ row['EOD_PE_OI_Sum'] }}"></div></td>
@@ -71,21 +71,21 @@ content %}
         <div data-number="{{ row['EOD_PE_OI_Change_Sum'] }}"></div>
         <span
           >{{ '{:.2f}'.format((row['EOD_PE_OI_Change_Sum'] /
-          row['EOD_PE_OI_Sum'])*100|float) }}</span
+          row['EOD_PE_OI_Sum'])*100|float) if row['EOD_PE_OI_Sum'] else '0.00' }}</span
         >
       </td>
       <td>
         <div data-number="{{ row['ITM_EOD_PE_OI_Sum'] }}"></div>
         <span
           >{{ '{:.2f}'.format((row['ITM_EOD_PE_OI_Sum'] /
-          row['EOD_PE_OI_Sum'])*100|float) }}</span
+          row['EOD_PE_OI_Sum'])*100|float) if row['EOD_PE_OI_Sum'] else '0.00' }}</span
         >
       </td>
       <td>
         <div data-number="{{ row['ITM_EOD_PE_OI_Change_Sum'] }}"></div>
         <span
           >{{ '{:.2f}'.format((row['ITM_EOD_PE_OI_Change_Sum'] /
-          row['ITM_EOD_PE_OI_Sum'])*100|float) }}</span
+          row['ITM_EOD_PE_OI_Sum'])*100|float) if row['ITM_EOD_PE_OI_Sum'] else '0.00' }}</span
         >
       </td>
     </tr>
