@@ -11,3 +11,5 @@ Run following commands
 
 1. `pip freeze > requirements.txt`
 2. https://www.youtube.com/watch?v=LaMVBDbUtMA
+3. login to vercel => `vercel login`
+4. trigger deployment => `vercel .`
