@@ -1,0 +1,13 @@
+name: Keep Vercel App Alive
+
+on:
+  schedule:
+    - cron: '0 0 */2 * *'  # every 2 days at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Curl ping to Vercel app
+        run: curl -sSf https://bhav-automation.vercel.app/history > /dev/null
