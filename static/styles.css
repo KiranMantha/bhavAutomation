@@ -93,6 +93,8 @@ table caption {
 table th {
   border: 1px solid #bbb;
   border-left: none;
+  position: sticky;
+  top: 0;
 }
 table td {
   border-bottom: 1px solid #bbb;
